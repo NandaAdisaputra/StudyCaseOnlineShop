@@ -1,0 +1,33 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.OnlineShop" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+    <!-- Style untuk Ikon pada Input -->
+    <style name="outline">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:tint">@color/red_primary</item>
+    </style>
+
+    <!-- Style untuk EditText pada Input -->
+    <style name="InputField">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColor">@color/red_primary</item>
+        <item name="android:textColorHint">@color/red_hint</item>
+    </style>
+
+    <!-- Style untuk Garis Pembatas (Divider) -->
+    <style name="Divider">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:background">@color/red_primary</item>
+    </style>
+
+    <style name="Theme.OnlineShop" parent="Base.Theme.OnlineShop" />
+</resources>
