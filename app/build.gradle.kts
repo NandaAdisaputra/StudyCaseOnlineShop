@@ -42,30 +42,30 @@ android {
 }
 
 dependencies {
+    // Core Android & UI Components (Bawaan Proyek)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.recyclerview)
 
-    // Networking & Parsing
+    // Networking & API Parsing (Retrofit & Gson Converter untuk komunikasi data dengan Server/REST API)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
-    // Lifecycle (ViewModel & LiveData)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx) // [BARU DITAMBAHKAN]
-    implementation(libs.androidx.lifecycle.livedata.ktx) // [BARU DITAMBAHKAN]
+    // Lifecycle Architecture Components (ViewModel untuk manajemen state UI & LiveData untuk observasi data reaktif)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
 
-    // MVVM & Coroutines
+    // MVVM & Asynchronous Programming (Activity KTX untuk ekstensi Activity & Coroutines Android untuk proses background asinkron)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.coroutines.android)
 
+    // Fragment KTX (Ekstensi Kotlin untuk mempermudah manipulasi Fragment dan ViewModel scoping)
     implementation(libs.androidx.fragment.ktx)
 
-    // Image Loader
+    // Image Loader & Network Logging (Glide untuk memuat gambar dari URL, OkHttp & Logging Interceptor untuk debugging HTTP request)
     implementation(libs.glide)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
 }
