@@ -1,5 +1,6 @@
 package com.nandaadisaputra.onlineshop.data.repository
 
+import com.nandaadisaputra.onlineshop.data.model.CartResponse
 import com.nandaadisaputra.onlineshop.data.model.DetailProductResponse
 import com.nandaadisaputra.onlineshop.data.remote.ApiService
 import com.nandaadisaputra.onlineshop.data.remote.ResultState
@@ -52,6 +53,27 @@ class DetailRepository(private val apiService: ApiService) {
         } catch (e: Exception) {
             // 6. Menangani kesalahan tak terduga lainnya (misal: Parsing error, null pointer, dll.)
             emit(ResultState.Error("Terjadi kesalahan yang tidak diketahui: ${e.localizedMessage ?: "Kesalahan sistem"}"))
+        }
+    }
+    /**
+     * Tambahkan fungsi ini di DetailRepository agar error addToCart terselesaikan
+     */
+    fun addToCart(productId: Int, quantity: Int): Flow<ResultState<CartResponse>> = flow {
+        emit(ResultState.Loading)
+        try {
+            // Memanggil endpoint API Pesan Produk (cart/add.php)
+            val response = apiService.addToCart(productId, quantity)
+            if (response.status || response.code == 201 || response.code == 200) {
+                emit(ResultState.Success(response))
+            } else {
+                emit(ResultState.Error(response.message ?: "Gagal menambahkan produk ke keranjang."))
+            }
+        } catch (e: HttpException) {
+            emit(ResultState.Error("Kesalahan server (HTTP ${e.code()})"))
+        } catch (e: IOException) {
+            emit(ResultState.Error("Koneksi internet bermasalah."))
+        } catch (e: Exception) {
+            emit(ResultState.Error("Terjadi kesalahan: ${e.localizedMessage}"))
         }
     }
 }

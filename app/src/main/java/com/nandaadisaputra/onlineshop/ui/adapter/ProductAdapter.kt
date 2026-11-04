@@ -16,72 +16,80 @@ import com.nandaadisaputra.onlineshop.data.model.ProductItem
 import com.nandaadisaputra.onlineshop.databinding.ItemProductBinding
 
 /**
- * ProductAdapter adalah Adapter RecyclerView yang menggunakan ListAdapter dan DiffUtil
- * untuk menampilkan daftar produk secara efisien dan dinamis.
+ * ProductAdapter adalah kelas penghubung (Adapter) RecyclerView yang menggunakan [ListAdapter]
+ * dan [DiffUtil] untuk menampilkan daftar produk secara efisien, dinamis, dan berperforma tinggi.
+ *
+ * @property onItemClick Fungsi Higher-Order (Lambda) yang akan dipanggil ketika salah satu item produk diklik.
  */
 class ProductAdapter(private val onItemClick: (ProductItem) -> Unit) :
     ListAdapter<ProductItem, ProductAdapter.ProductViewHolder>(DIFF_CALLBACK) {
 
     /**
-     * ViewHolder bertugas menyimpan referensi view dari item_product.xml
-     * dan mengikat data produk (Binding) ke dalam komponen UI.
+     * Kelas dalam (Inner Class) ProductViewHolder bertugas memegang referensi komponen UI
+     * dari `item_product.xml` melalui ViewBinding dan mengikat (bind) data produk ke tampilan.
      */
     inner class ProductViewHolder(private val binding: ItemProductBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        /**
+         * Fungsi untuk memasukkan data dari objek [ProductItem] ke dalam komponen UI (TextView & ImageView).
+         */
         fun bind(product: ProductItem) {
-            // Menampilkan teks judul dan harga produk
-            binding.tvProductTitle.text = product.nama_product
-            binding.tvProductPrice.text = "Rp ${product.harga}"
+            // Menggunakan scope function 'apply' agar penulisan kode lebih bersih tanpa menulis 'binding.' berulang kali
+            binding.apply {
+                // 1. Menampilkan teks nama produk dan harga ke komponen TextView
+                tvProductTitle.text = product.nama_product
+                tvProductPrice.text = "Rp ${product.harga}"
 
-            // 1. Tampilkan ProgressBar terlebih dahulu sebelum gambar mulai diunduh dari server
-            binding.progressBarImage.visibility = View.VISIBLE
+                // 2. Menampilkan ProgressBar kecil (progress_bar_image) sebelum proses unduh gambar dimulai
+                progressBarImage.visibility = View.VISIBLE
 
-            // 2. Memuat gambar menggunakan Glide dengan tambahan RequestListener
-            // agar ProgressBar bisa disembunyikan saat gambar selesai dimuat.
-            Glide.with(itemView.context)
-                .load(product.gambar)
-                .placeholder(android.R.drawable.ic_menu_gallery) // Gambar sementara saat proses loading
-                .error(android.R.drawable.ic_menu_close_clear_cancel) // Gambar alternatif jika gagal dimuat
-                .centerCrop() // Menyesuaikan potongan gambar agar rapi di ImageView
-                .listener(object : RequestListener<Drawable> {
+                // 3. Memuat gambar produk dari URL server menggunakan library Glide
+                Glide.with(itemView.context)
+                    .load(product.gambar)
+                    .placeholder(android.R.drawable.ic_menu_gallery)             // Gambar sementara saat proses unduh berlangsung
+                    .error(android.R.drawable.ic_menu_close_clear_cancel)         // Gambar alternatif jika URL rusak/gagal dimuat
+                    .centerCrop()                                                 // Menyesuaikan potongan gambar agar proporsional di ImageView
+                    .listener(object : RequestListener<Drawable> {
 
-                    // Dipanggil jika terjadi kesalahan / gagal saat memuat gambar dari server
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        // Sembunyikan ProgressBar agar tidak berputar terus saat error
-                        binding.progressBarImage.visibility = View.GONE
-                        return false // Beritahu Glide untuk tetap memproses error placeholder
-                    }
+                        // Dipanggil jika terjadi kesalahan / gagal saat mengunduh gambar dari server
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            // Sembunyikan ProgressBar agar tidak berputar terus menerus saat terjadi error
+                            progressBarImage.visibility = View.GONE
+                            return false // Kembalikan false agar Glide tetap memproses error placeholder di atas
+                        }
 
-                    // Dipanggil ketika gambar berhasil diunduh dan siap ditampilkan
-                    override fun onResourceReady(
-                        resource: Drawable,
-                        model: Any,
-                        target: Target<Drawable>,
-                        dataSource: DataSource,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        // Sembunyikan ProgressBar karena gambar sudah sukses tampil
-                        binding.progressBarImage.visibility = View.GONE
-                        return false // Beritahu Glide untuk melanjutkan menampilkan resource ke ImageView
-                    }
-                })
-                .into(binding.ivProductImage)
+                        // Dipanggil ketika gambar berhasil diunduh sepenuhnya dan siap dirender ke layar
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            // Sembunyikan ProgressBar karena gambar sudah sukses tampil
+                            progressBarImage.visibility = View.GONE
+                            return false // Kembalikan false agar Glide melanjutkan menampilkan gambar ke ivProductImage
+                        }
+                    })
+                    .into(ivProductImage)
 
-            // Event klik pada item produk (misal untuk menuju ke halaman detail)
-            itemView.setOnClickListener {
-                onItemClick(product)
+                // 4. Menangani aksi klik pada kartu item produk (mengirim data produk ke Fragment melalui lambda)
+                itemView.setOnClickListener {
+                    onItemClick(product)
+                }
             }
         }
     }
 
     /**
-     * Dipanggil saat RecyclerView membutuhkan ViewHolder baru untuk layout item.
+     * Fungsi wajib RecyclerView 1: Dipanggil saat RecyclerView membutuhkan wadah tampilan baru (ViewHolder).
+     * Di sinilah file layout XML (`item_product.xml`) diubah (inflate) menjadi objek ViewBinding.
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val binding = ItemProductBinding.inflate(
@@ -91,7 +99,8 @@ class ProductAdapter(private val onItemClick: (ProductItem) -> Unit) :
     }
 
     /**
-     * Dipanggil untuk menghubungkan data dari posisi tertentu ke ViewHolder.
+     * Fungsi wajib RecyclerView 2: Dipanggil untuk menghubungkan data dari posisi baris tertentu
+     * ke dalam ViewHolder.
      */
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         holder.bind(getItem(position))
@@ -99,16 +108,18 @@ class ProductAdapter(private val onItemClick: (ProductItem) -> Unit) :
 
     companion object {
         /**
-         * DIFF_CALLBACK digunakan oleh ListAdapter untuk membandingkan item lama dan item baru secara efisien,
-         * sehingga RecyclerView hanya melakukan render ulang pada data yang benar-benar berubah.
+         * DIFF_CALLBACK adalah algoritma pembanding yang digunakan oleh [ListAdapter] untuk mengevaluasi
+         * perbedaan antara daftar item lama dan daftar item baru secara otomatis di background thread.
+         * Dengan DiffUtil, RecyclerView tidak merender ulang seluruh daftar, melainkan hanya memperbarui
+         * item yang benar-benar mengalami perubahan (sangat efisien untuk performa aplikasi).
          */
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ProductItem>() {
-            // Memeriksa apakah item memiliki ID yang sama
+            // Memeriksa apakah dua item memiliki ID unik yang sama
             override fun areItemsTheSame(oldItem: ProductItem, newItem: ProductItem): Boolean {
                 return oldItem.id == newItem.id
             }
 
-            // Memeriksa apakah seluruh isi konten dari item sama
+            // Memeriksa apakah seluruh isi konten/properti dari item tersebut sama persis
             override fun areContentsTheSame(oldItem: ProductItem, newItem: ProductItem): Boolean {
                 return oldItem == newItem
             }

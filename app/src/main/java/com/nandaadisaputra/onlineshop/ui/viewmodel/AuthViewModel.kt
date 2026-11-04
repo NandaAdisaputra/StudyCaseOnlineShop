@@ -8,75 +8,109 @@ import com.nandaadisaputra.onlineshop.data.model.AuthResponse
 import com.nandaadisaputra.onlineshop.data.model.UserData
 import com.nandaadisaputra.onlineshop.data.remote.ResultState
 import com.nandaadisaputra.onlineshop.data.repository.AuthRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+/**
+ * AuthViewModel adalah kelas pengelola logika bisnis dan state (ViewModel dalam arsitektur MVVM)
+ * yang khusus menangani proses autentikasi pengguna, meliputi Registrasi Akun (Register),
+ * Masuk Akun (Login), dan Keluar Akun (Logout).
+ *
+ * @property repository Objek AuthRepository yang bertindak sebagai sumber data (Data Source).
+ * Nilai default menggunakan instansiasi `AuthRepository()` secara langsung.
+ */
 class AuthViewModel(
     private val repository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
     // ====================================================================
     // 1. LIVEDATA UNTUK MENAMPUNG STATE (REGISTER, LOGIN, LOGOUT)
+    // Penerapan Prinsip Encapsulation (Backing Property Pattern):
+    // Variabel bergaris bawah (_) bersifat private & mutable (bisa diubah di dalam ViewModel).
+    // Variabel tanpa garis bawah bersifat public & read-only (hanya bisa diamati oleh UI/Activity).
     // ====================================================================
+
+    // LiveData State untuk proses Register
     private val _registerResult = MutableLiveData<ResultState<AuthResponse<UserData>>>()
     val registerResult: LiveData<ResultState<AuthResponse<UserData>>> get() = _registerResult
 
+    // LiveData State untuk proses Login
     private val _loginResult = MutableLiveData<ResultState<AuthResponse<UserData>>>()
     val loginResult: LiveData<ResultState<AuthResponse<UserData>>> get() = _loginResult
 
+    // LiveData State untuk proses Logout
     private val _logoutResult = MutableLiveData<ResultState<AuthResponse<Any?>>>()
     val logoutResult: LiveData<ResultState<AuthResponse<Any?>>> get() = _logoutResult
 
-    // ====================================================================
-    // 2. FUNGSI UTAMA (BUSINESS LOGIC)
-    // ====================================================================
-
-    fun register(username: String, email: String, alamat: String, noWhatsApp: String, password: String) {
-        _registerResult.executeApiCall {
-            repository.register(username, email, alamat, noWhatsApp, password)
-        }
-    }
-
-    fun login(username: String, password: String) {
-        _loginResult.executeApiCall {
-            repository.login(username, password)
-        }
-    }
-
-    fun logout(token: String) {
-        _logoutResult.executeApiCall {
-            repository.logout(token)
-        }
-    }
 
     // ====================================================================
-    // 3. HELPER FUNCTION (UNTUK MERINGKAS TRY-CATCH & LOADING STATE)
+    // 2. FUNGSI UTAMA (BUSINESS LOGIC / EVENT HANDLER)
+    // Fungsi-fungsi ini dipanggil oleh UI (seperti LoginActivity atau RegisterActivity)
+    // saat pengguna menekan tombol aksi.
     // ====================================================================
 
     /**
-     * Helper extension function khusus MutableLiveData untuk menangani
-     * pemanggilan API secara aman dengan type-safety yang bersih tanpa casting manual.
+     * Fungsi untuk memicu proses pendaftaran akun baru ke server.
      */
-    private fun <T> MutableLiveData<ResultState<AuthResponse<T>>>.executeApiCall(
-        apiCall: suspend () -> AuthResponse<T>
+    fun register(
+        username: String,
+        email: String,
+        alamat: String,
+        noWhatsApp: String,
+        password: String
     ) {
-        // 1. Ubah state menjadi Loading saat permintaan dimulai
-        value = ResultState.Loading
+        // Memanggil fungsi register di repository yang mengembalikan Flow,
+        // lalu menangkap setiap perubahan statusnya menggunakan helper 'collectFlow'.
+        _registerResult.collectFlow(
+            repository.register(username, email, alamat, noWhatsApp, password)
+        )
+    }
 
+    /**
+     * Fungsi untuk memicu proses masuk akun (Login) ke server.
+     */
+    fun login(username: String, password: String) {
+        _loginResult.collectFlow(
+            repository.login(username, password)
+        )
+    }
+
+    /**
+     * Fungsi untuk memicu proses keluar akun (Logout) ke server.
+     */
+    fun logout(token: String) {
+        _logoutResult.collectFlow(
+            repository.logout(token)
+        )
+    }
+
+
+    // ====================================================================
+    // 3. HELPER FUNCTION (UNTUK MENANGKAP ALIRAN FLOW DARI REPOSITORY)
+    // Konsep DRY (Don't Repeat Yourself): Menghindari penulisan blok viewModelScope
+    // dan collectLatest yang berulang di setiap fungsi autentikasi.
+    // ====================================================================
+
+    /**
+     * Helper extension function khusus [MutableLiveData] untuk mengumpulkan (collect)
+     * data aliran asinkron [Flow] yang dipancarkan oleh Repository secara aman.
+     *
+     * @param T Tipe data generik dari respons server
+     * @Flow Flow berisi [ResultState] (Loading -> Success / Error) dari repository
+     */
+    private fun <T> MutableLiveData<ResultState<T>>.collectFlow(
+        flow: Flow<ResultState<T>>
+    ) {
+        // Menjalankan coroutine di dalam viewModelScope.
+        //viewModelScope terikat otomatis dengan siklus hidup ViewModel, sehingga jika ViewModel
+        // dihancurkan, proses jaringan yang sedang berjalan akan otomatis dibatalkan (mencegah memory leak).
         viewModelScope.launch {
-            try {
-                // 2. Panggil fungsi suspend dari repository
-                val response = apiCall()
-
-                if (response.status) {
-                    // 3. Jika berhasil, kirim data sukses secara aman (Type-safe)
-                    value = ResultState.Success(response)
-                } else {
-                    // 4. Jika gagal dari sisi server (status false), kirim pesan error
-                    value = ResultState.Error(response.message ?: "Terjadi kesalahan pada server")
-                }
-            } catch (e: Exception) {
-                // 5. Jika terjadi gangguan jaringan atau exception, tangkap di sini
-                value = ResultState.Error(e.localizedMessage ?: "Terjadi kesalahan koneksi")
+            // collectLatest mendengarkan pancaran data Flow dan membatalkan pekerjaan sebelumnya
+            // jika ada pancaran status baru yang masuk.
+            flow.collectLatest { result ->
+                // Memperbarui nilai LiveData agar UI (Activity) merespons secara reaktif
+                value = result
             }
         }
     }
