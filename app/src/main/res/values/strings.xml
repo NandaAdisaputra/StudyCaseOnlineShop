@@ -42,4 +42,19 @@
     <string name="dibuat_pada">Dibuat Pada</string>
     <string name="_2026_10_14_04_55_15">waktu</string>
     <string name="back">back</string>
+    <string name="hint_password_dots">**********</string>
+    <string name="title_my_profile">MY PROFILE</string>
+    <string name="label_nama">Nama</string>
+    <string name="btn_edit">EDIT</string>
+    <string name="empty_cart">Belum ada pesanan di keranjang</string>
+    <!-- Edit Profile Activity -->
+    <string name="title_edit_profile">EDIT PROFILE</string>
+    <string name="label_edit_username">Username</string>
+    <string name="hint_edit_username">Masukkan Username Baru</string>
+    <string name="label_old_password">Password Lama</string>
+    <string name="hint_old_password">Masukkan Password Lama</string>
+    <string name="label_new_password">Password Baru</string>
+    <string name="hint_new_password">Masukkan Password Baru (Min. 6 Karakter)</string>
+    <string name="btn_simpan">SIMPAN</string>
+    <string name="content_description_back">Kembali</string>
 </resources>
