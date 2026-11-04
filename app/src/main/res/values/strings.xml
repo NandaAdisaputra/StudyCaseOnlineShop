@@ -26,4 +26,20 @@
     <string name="admin_username">Admin Username</string>
     <string name="profil">Profil</string>
     <string name="online_shop">Online Shop</string>
+
+    <!-- User Home Fragment -->
+    <string name="search_hint">Cari Product</string>
+    <string name="product_title_sample">Cardinal Sepatu Sneakers\nAPria M1329T01A</string>
+    <string name="product_price_sample">321.500</string>
+
+    <!-- Detail User Activity -->
+    <string name="label_product_name">Nama Product</string>
+    <string name="label_product_price">Harga Product</string>
+    <string name="label_product_description">Deskripsi Product</string>
+    <string name="value_product_price">321.500,-</string>
+    <string name="value_product_description">sepatu sneakers kasual berpotongan low-cut dengan material katun</string>
+    <string name="btn_buy_text">BELI</string>
+    <string name="dibuat_pada">Dibuat Pada</string>
+    <string name="_2026_10_14_04_55_15">waktu</string>
+    <string name="back">back</string>
 </resources>
