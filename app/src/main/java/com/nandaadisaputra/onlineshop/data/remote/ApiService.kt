@@ -6,11 +6,17 @@ import com.nandaadisaputra.onlineshop.data.model.CartResponse
 import com.nandaadisaputra.onlineshop.data.model.DetailProductResponse
 import com.nandaadisaputra.onlineshop.data.model.ProductResponse
 import com.nandaadisaputra.onlineshop.data.model.UserData
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 /**
@@ -113,4 +119,43 @@ interface ApiService {
      */
     @GET("OnlineShop/cart/listpesanan.php")
     suspend fun getCartList(): CartListResponse
+
+    /**
+     * Endpoint 10: Menambah Produk Baru (Create Product - Admin).
+     * - @Multipart & @Part: Digunakan untuk mengirim form-data yang berisi teks (RequestBody) dan file gambar (MultipartBody.Part).
+     */
+    @Multipart
+    @POST("OnlineShop/products/create.php")
+    suspend fun createProduct(
+        @Part("nama_product") namaProduct: RequestBody,
+        @Part("harga") harga: RequestBody,
+        @Part("deskripsi") deskripsi: RequestBody,
+        @Part gambar: MultipartBody.Part
+    ): DetailProductResponse
+
+    /**
+     * Endpoint 11: Memperbarui Data Produk (Update Product - Admin).
+     * Mengirimkan form-data teks (id, nama_product, harga, deskripsi) dan file gambar opsional melalui HTTP PUT.
+     */
+    @Multipart
+    @PUT("OnlineShop/products/update.php")
+    suspend fun updateProduct(
+        @Part("id") id: RequestBody,
+        @Part("nama_product") namaProduct: RequestBody,
+        @Part("harga") harga: RequestBody,
+        @Part("deskripsi") deskripsi: RequestBody,
+        @Part gambar: MultipartBody.Part? = null
+    ): DetailProductResponse
+
+    /**
+     * Endpoint 12: Menghapus Produk Berdasarkan ID (Delete Product - Admin).
+     * - @HTTP(method = "DELETE", ..., hasBody = true): Digunakan agar metode HTTP DELETE di Retrofit
+     *   dapat mengirimkan form-data `id` di dalam Body sekaligus parameter Query `?id=` di URL.
+     */
+    @Multipart
+    @HTTP(method = "DELETE", path = "OnlineShop/products/delete.php", hasBody = true)
+    suspend fun deleteProduct(
+        @Query("id") queryId: Int,
+        @Part("id") bodyId: RequestBody
+    ): DetailProductResponse
 }

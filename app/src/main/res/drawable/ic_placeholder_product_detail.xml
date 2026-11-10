@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="200dp"
+    android:viewportWidth="320"
+    android:viewportHeight="200">
+
+    <!-- Latar Belakang Kotak Membulat -->
+    <path
+        android:fillColor="@color/bottom_nav_background"
+        android:pathData="M16,4 H304 C310.63,4 316,9.37 316,16 V184 C316,190.63 310.63,196 304,196 H16 C9.37,196 4,190.63 4,184 V16 C4,9.37 9.37,4 16,4 Z"
+        android:strokeWidth="2"
+        android:strokeColor="@color/red_hint" />
+
+    <!-- Bingkai Ikon Gambar di Tengah -->
+    <path
+        android:fillColor="@color/white"
+        android:pathData="M124,64 H196 C200.42,64 204,67.58 204,72 V128 C204,132.42 200.42,136 196,136 H124 C119.58,136 116,132.42 116,128 V72 C116,67.58 119.58,64 124,64 Z"
+        android:strokeWidth="2.5"
+        android:strokeColor="@color/red_dark"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Ornamen Lingkaran (Matahari) di Dalam Ikon -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M142,86 m-7,0 a7,7 0,1 1,14 0 a7,7 0,1 1,-14 0"
+        android:strokeWidth="2.5"
+        android:strokeColor="@color/red_dark" />
+
+    <!-- Ornamen Gunung / Lanskap di Dalam Ikon -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M138,136 L172,96 L204,126"
+        android:strokeWidth="2.5"
+        android:strokeColor="@color/red_dark"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+</vector>

@@ -1,42 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:background="@color/background_white"
+    android:padding="24dp"
+    tools:context=".ui.profile.ProfileAdminActivity">
 
-    <!-- Teks Username Admin -->
+    <!-- Tombol Kembali (<) di Kiri Atas (Ukuran 48dp agar aman dari warning Touch Target) -->
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/kembali"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/red_primary" />
+
+    <!-- Judul Halaman "MY PROFILE" Sejajar dengan Tombol Back -->
     <TextView
-        android:id="@+id/tv_username"
+        android:id="@+id/tv_profile_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/admin_username"
+        android:text="@string/my_profile"
         android:textColor="@color/red_primary"
-        android:textSize="22sp"
+        android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginBottom="32dp" />
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btn_back" />
 
-    <!-- Tombol Logout -->
-    <Button
+    <!-- Label "Nama" Berwarna Merah -->
+    <TextView
+        android:id="@+id/tv_label_nama"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="160dp"
+        android:text="@string/nama"
+        android:textColor="@color/red_primary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_profile_title" />
+
+    <!-- Teks Username Admin Berwarna Hitam Tebal -->
+    <TextView
+        android:id="@+id/tv_username"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/admin_username"
+        android:textColor="@color/text_black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_label_nama" />
+
+    <!-- Tombol LOGOUT -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_logout"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="96dp"
+        android:layout_marginEnd="24dp"
         android:backgroundTint="@color/red_primary"
         android:text="@string/logout"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:cornerRadius="12dp" />
+        app:cornerRadius="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_username" />
 
     <!-- ProgressBar untuk Loading State saat proses Logout -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:indeterminateTint="@color/red_primary"
         android:visibility="gone"
-        android:layout_marginTop="16dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_logout" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,20 +1,25 @@
 package com.nandaadisaputra.onlineshop.ui.profile
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.nandaadisaputra.onlineshop.R
 import com.nandaadisaputra.onlineshop.data.helper.navigateToLoginOnLogout
 import com.nandaadisaputra.onlineshop.data.helper.setLoading
 import com.nandaadisaputra.onlineshop.data.helper.showToast
 import com.nandaadisaputra.onlineshop.data.remote.ResultState
 import com.nandaadisaputra.onlineshop.data.session.UserPreference
 import com.nandaadisaputra.onlineshop.databinding.ActivityProfileAdminBinding
+import com.nandaadisaputra.onlineshop.databinding.DialogConfirmLogoutBinding
 import com.nandaadisaputra.onlineshop.ui.viewmodel.AuthViewModel
 
 /**
  * ProfileAdminActivity adalah halaman (View dalam arsitektur MVVM) khusus untuk akun berhak akses Administrator.
  * Halaman ini bertugas menampilkan informasi identitas profil admin yang sedang login serta
- * menyediakan tombol interaktif untuk keluar akun (Logout) melalui server dan sesi lokal.
+ * menyediakan tombol interaktif beserta dialog konfirmasi untuk keluar akun (Logout) melalui server dan sesi lokal.
  */
 class ProfileAdminActivity : AppCompatActivity() {
 
@@ -42,14 +47,14 @@ class ProfileAdminActivity : AppCompatActivity() {
         // Menginisialisasi objek UserPreference dengan Context Activity ini
         userPreference = UserPreference(this)
 
-        // Memanggil fungsi-fungsi modular untuk inisruktur kode yang rapi
+        // Memanggil fungsi-fungsi modular untuk struktur kode yang rapi
         setupView()
         setupListeners()
         observeLogoutResult()
     }
 
     // ====================================================================
-    // 2. SETUP TAMPILAN & EVENT HANDLING
+    // 2. SETUP TAMPILAN, DIALOG KONFIRMASI & EVENT HANDLING
     // ====================================================================
 
     /**
@@ -58,26 +63,69 @@ class ProfileAdminActivity : AppCompatActivity() {
     private fun setupView() {
         // Mengambil username admin yang tersimpan di SharedPreferences lokal
         val username = userPreference.getUsername()
-        // Menampilkan username ke TextView (tvUsername). Jika null, tampilkan teks default "Administrator".
-        binding.tvUsername.text = username ?: "Administrator"
+        // Menampilkan username ke TextView (tvUsername). Jika null/kosong, tampilkan teks default dari strings.xml.
+        binding.tvUsername.text = if (!username.isNullOrEmpty()) {
+            username
+        } else {
+            getString(R.string.admin_username)
+        }
     }
 
     /**
      * Fungsi untuk menangani aksi klik (Event Listener) pada komponen UI.
      */
     private fun setupListeners() {
-        // Aksi ketika tombol LOGOUT (btn_logout) diklik oleh admin
-        binding.btnLogout.setOnClickListener {
-            // Mengambil token autentikasi aktif dari SharedPreferences
-            val token = userPreference.getToken()
+        // Aksi ketika tombol kembali (<) diklik oleh admin
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
 
-            if (!token.isNullOrEmpty()) {
-                // Jika token ada, panggil fungsi logout di AuthViewModel untuk menghapus sesi di server
-                authViewModel.logout(token)
-            } else {
-                // Jika token kosong, langsung bersihkan sesi lokal saja
-                performLocalLogout()
-            }
+        // Aksi ketika tombol LOGOUT (btn_logout) diklik -> Tampilkan Alert Dialog Konfirmasi terlebih dahulu
+        binding.btnLogout.setOnClickListener {
+            showLogoutConfirmationDialog()
+        }
+    }
+
+    /**
+     * Fungsi untuk menampilkan Custom AlertDialog konfirmasi keluar aplikasi sesuai desain UI/UX.
+     */
+    private fun showLogoutConfirmationDialog() {
+        val dialogBinding = DialogConfirmLogoutBinding.inflate(layoutInflater)
+        val alertDialog = AlertDialog.Builder(this)
+            .setView(dialogBinding.root)
+            .setCancelable(true)
+            .create()
+
+        // Membuat latar belakang window dialog transparan agar sudut melengkung CardView terlihat rapi
+        alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        // Jika tombol BATAL diklik, tutup dialog
+        dialogBinding.btnBatal.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        // Jika tombol YA diklik, tutup dialog dan jalankan proses logout
+        dialogBinding.btnYa.setOnClickListener {
+            alertDialog.dismiss()
+            executeLogout()
+        }
+
+        alertDialog.show()
+    }
+
+    /**
+     * Fungsi untuk mengeksekusi permintaan logout ke server atau sesi lokal.
+     */
+    private fun executeLogout() {
+        // Mengambil token autentikasi aktif dari SharedPreferences
+        val token = userPreference.getToken()
+
+        if (!token.isNullOrEmpty()) {
+            // Jika token ada, panggil fungsi logout di AuthViewModel untuk menghapus sesi di server
+            authViewModel.logout(token)
+        } else {
+            // Jika token kosong, langsung bersihkan sesi lokal saja
+            performLocalLogout()
         }
     }
 
@@ -99,7 +147,10 @@ class ProfileAdminActivity : AppCompatActivity() {
                 // 2. KONDISI SUKSES: Server berhasil memproses penghapusan sesi token
                 is ResultState.Success -> {
                     showLoading(false)
-                    showToast(result.data.message ?: "Logout berhasil")
+                    val message = result.data.message?.ifEmpty {
+                        getString(R.string.msg_logout_success)
+                    } ?: getString(R.string.msg_logout_success)
+                    showToast(message)
                     performLocalLogout() // Hapus sesi lokal dan kembali ke halaman Login
                 }
 
@@ -116,11 +167,11 @@ class ProfileAdminActivity : AppCompatActivity() {
     }
 
     /**
-     * Fungsi pembantu untuk mengatur visibilitas ProgressBar dan mengaktifkan/menonaktifkan tombol Logout
+     * Fungsi pembantu untuk mengatur visibilitas ProgressBar dan mengaktifkan/menonaktifkan tombol
      * secara otomatis menggunakan extension helper (`setLoading`).
      */
     private fun showLoading(isLoading: Boolean) {
-        binding.progressBar.setLoading(isLoading, binding.btnLogout)
+        binding.progressBar.setLoading(isLoading, binding.btnLogout, binding.btnBack)
     }
 
     /**
